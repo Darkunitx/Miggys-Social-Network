@@ -2,29 +2,29 @@ const { Schema, Types, model } = require('mongoose');
 
 const dayjs = require('dayjs');
 
+function formatDate(date) {
+  return dayjs(date).format('MMM D, YYYY [at] h:mm a');
+}
 
-
-const thoughtSchema = new Schema(
+const reactionSchema = new Schema(
   {
-    assignmentId: {
+    reactionId: {
       type: Schema.Types.ObjectId,
       default: () => new Types.ObjectId(),
     },
-    assignmentName: {
+    reactionBody: {
       type: String,
       required: true,
-      maxlength: 50,
-      minlength: 4,
-      default: 'Unnamed assignment',
+      maxlength: 280,
     },
-    score: {
-      type: Number,
+    username: {
+      type: String,
       required: true,
-      default: () => Math.floor(Math.random() * (100 - 70 + 1) + 70),
     },
     createdAt: {
       type: Date,
       default: Date.now,
+      get: (createdAtVal) => formatDate(createdAtVal),
     },
   },
   {
@@ -35,4 +35,38 @@ const thoughtSchema = new Schema(
   }
 );
 
-module.exports = assignmentSchema;
+
+const thoughtSchema = new Schema(
+  {
+    thoughtText: {
+      type: String,
+      required: true,
+      minlength: 1,
+      maxlength: 280,
+    },
+    createdAt: {
+      type: Date,
+      default: Date.now,
+      get: (createdAtVal) => formatDate(createdAtVal),
+    },
+    username: {
+      type: String,
+      required: true,
+    },
+    reacions: [reactionSchema],
+  },
+  {
+    toJSON: {
+      getters: true,
+    },
+    id: false,
+  }
+);
+
+thoughtSchema.virtual('reactionCount').get(function () {
+  return this.reactions.length;
+});
+
+const thoughts = model('thoughts', thoughtSchema);
+
+module.exports = thoughts;
