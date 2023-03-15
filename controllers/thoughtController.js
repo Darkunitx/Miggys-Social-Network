@@ -77,14 +77,14 @@ updateThought(req, res) {
 
 deleteThought(req, res) {
   thoughts.findOneAndRemove({ _id: req.params.thoughtId })
-  .then ((thought) =>
-      !thought
-          ? res
-              .status(404)
-              .json ({ message: "No thought found with this id!"})
-          : res.json ({message: "Thought has been successfully deleted!" })
-      )
-      .catch((err) => res.status(500).json(err));
+  .then ((thought) => {
+    if (!thought) {
+      res.status(404).json({ message: 'No thought found with this id!' });
+      return;
+    }
+    res.json('Thought deleted');
+  })
+  .catch((err) => res.status(500).json(err));
 },
 
 addReaction(req, res) {
